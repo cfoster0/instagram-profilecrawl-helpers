@@ -17,9 +17,17 @@ def main(seed):
 	mentionedUsers = Counter()
 	userProfiles = {}
 
+	unreadable = []
+
 	while (True):
 		for toRead in addList:
-			with open('profile ' + toRead + '.json', 'r') as f:
+			profileFName = 'profile ' + toRead + '.json'
+			if not os.path.isfile(profileFName):
+				users.remove(toRead)
+				unreadable.append(toRead)
+				continue
+
+			with open(profileFName, 'r') as f:
 				profile = json.loads(f.read())
 			userProfiles[toRead] = profile
 			mentions = set()
@@ -33,6 +41,7 @@ def main(seed):
 			userMentions[toRead] = mentions
 		mm = multiple_mention(mentionedUsers)
 		addList = [s for s in list(set(mm) - users)]
+		addList = [s for s in addList if s not in unreadable]
 		if not addList:
 			break
 		for toAdd in addList:
@@ -43,7 +52,7 @@ def main(seed):
 				f.write('\n' + li)
 
 def multiple_mention(counter):
-	return [key for key in counter if counter[key] > 1]
+	return [key for key in counter if counter[key] > 5]
 
 
 if __name__ == '__main__':
