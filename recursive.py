@@ -22,6 +22,8 @@ def main():
 
 	seed = args.input_file
 	save = args.output_file
+	with open(save, 'w+') as f:
+		pass
 
 	seedList = []
 	users = set()
@@ -41,6 +43,8 @@ def main():
 
 	unreadable = []
 
+
+
 	while (True):
 		for toRead in addList:
 			profileFName = 'profile ' + toRead + '.json'
@@ -58,6 +62,10 @@ def main():
 					unreadable.append(toRead)
 					addList.remove(toRead)
 					continue
+				else:
+					with open(save, 'a+') as f:
+						f.write(toRead + '\n')
+
 
 			userProfiles[toRead] = profile
 			mentions = set()
@@ -77,10 +85,10 @@ def main():
 		for toAdd in addList:
 			os.system('npm-run instagram-profilecrawl ' + toAdd)
 			users.add(toAdd)
-		with open(save, 'a+') as f:
-			for li in addList:
-				#f.write('\n' + li)
-				f.write(li + '\n')
+		#with open(save, 'a+') as f:
+		#	for li in addList:
+		#		#f.write('\n' + li)
+		#		f.write(li + '\n')
 
 def multiple_mention(counter):
 	return [key for key in counter if counter[key] > 1]
