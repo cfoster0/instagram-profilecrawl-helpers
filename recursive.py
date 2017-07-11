@@ -53,7 +53,8 @@ def main():
 				profile = json.loads(f.read())
 
 			if toRead not in seedList:
-				if profile["numberFollowers"] < 100000 or profile["official"] == True:
+				#if profile["numberFollowers"] < 100000 or profile["official"] == True:
+				if profile["numberFollowers"] < 100000:
 					unreadable.append(toRead)
 					addList.remove(toRead)
 					continue
