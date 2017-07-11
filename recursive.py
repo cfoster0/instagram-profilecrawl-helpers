@@ -1,16 +1,38 @@
 import sys
 import os
 import json
+import argparse
 from collections import Counter
 
-def main(seed):
+def main():
+	parser = argparse.ArgumentParser(description='Recursively crawl Instagram profiles.')
+	parser.add_argument('--input_file',
+                      dest='input_file',
+                      type=str,
+                      help='File with seed list of profiles.')
+	parser.add_argument('--output_file',
+                      dest='output_file',
+                      type=str,
+                      help='File to write outputs to.')
+	parser.add_argument('--skip_download',
+                      dest='skip_download',
+                      action='store_true',
+                      help='Flag to skip initial profile loading.')
+	args = parser.parse_args()
+
+	seed = args.input_file
+	save = args.output_file
+
+	seedList = []
 	users = set()
 
 	fName = seed
-	lines = [line.rstrip('\n') for line in open(fName)];
+	lines = [line.rstrip('\r\n') for line in open(fName)];
 	for line in lines:
+		seedList.append(line)
 		users.add(line)
-		os.system('npm-run instagram-profilecrawl ' + line)
+		if not args.skip_download:
+			os.system('npm-run instagram-profilecrawl ' + line)
 	addList = list(users)
 
 	userMentions = {}
@@ -29,6 +51,13 @@ def main(seed):
 
 			with open(profileFName, 'r') as f:
 				profile = json.loads(f.read())
+
+			if toRead not in seedList:
+				if profile["numberFollowers"] < 100000 or profile["official"] == True:
+					unreadable.append(toRead)
+					addList.remove(toRead)
+					continue
+
 			userProfiles[toRead] = profile
 			mentions = set()
 
@@ -45,15 +74,16 @@ def main(seed):
 		if not addList:
 			break
 		for toAdd in addList:
-			users.add(toAdd)
 			os.system('npm-run instagram-profilecrawl ' + toAdd)
-		with open(seed, 'a+') as f:
+			users.add(toAdd)
+		with open(save, 'a+') as f:
 			for li in addList:
-				f.write('\n' + li)
+				#f.write('\n' + li)
+				f.write(li + '\n')
 
 def multiple_mention(counter):
-	return [key for key in counter if counter[key] > 5]
+	return [key for key in counter if counter[key] > 1]
 
 
 if __name__ == '__main__':
-	main(sys.argv[1])
+	main()
